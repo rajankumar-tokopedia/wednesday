@@ -10,7 +10,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 
-	apperr "github.com/tokopedia/wednesday/src/error"
+	"github.com/tokopedia/wednesday/src/apperror"
 )
 
 func next(ctx context.Context, httpHandler HttpHandler, server *repo, r *http.Request, p HttpParams) (interface{}, error) {
@@ -38,8 +38,13 @@ func (s *repo) routerHandler(httpHandler HttpHandler, server *repo) httprouter.H
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 
 		if err != nil {
-			errorBody, code := s.error.ErrorHandler(err)
-			w.WriteHeader(code)
+			errcode, msg, status := s.error.ErrorHandler(err)
+			response.Header.ErrCode = errcode
+			response.Header.StausCode = status
+			response.Header.Message = msg
+			w.WriteHeader(status)
+			response.EndProcessing()
+			errorBody, _ := json.Marshal(response)
 			w.Write(errorBody)
 			return
 		}
@@ -48,9 +53,12 @@ func (s *repo) routerHandler(httpHandler HttpHandler, server *repo) httprouter.H
 		response.Data = responseBody
 		resByte, err := json.Marshal(response)
 		if err != nil {
-			errorBody, code := s.error.ErrorHandler(err)
-			w.WriteHeader(code)
-			w.Write(errorBody)
+			errcode, msg, status := s.error.ErrorHandler(err)
+			response.Header.ErrCode = errcode
+			response.Header.StausCode = status
+			response.Header.Message = msg
+			w.WriteHeader(status)
+			response.EndProcessing()
 			return
 		}
 
@@ -63,7 +71,7 @@ func (s *repo) routerHandler(httpHandler HttpHandler, server *repo) httprouter.H
 	return routeHandler
 }
 
-func NewHttpServer(appErrorRepo apperr.AppError) HttpServer {
+func NewHttpServer(appErrorRepo apperror.AppError) HttpServer {
 	router := httprouter.New()
 	return &repo{
 		router: router,

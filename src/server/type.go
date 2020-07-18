@@ -7,11 +7,11 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 
-	apperr "github.com/tokopedia/wednesday/src/error"
+	"github.com/tokopedia/wednesday/src/apperror"
 )
 
 type repo struct {
-	error       apperr.AppError
+	error       apperror.AppError
 	router      *httprouter.Router
 	middlewares []HttpMiddleware
 }
@@ -25,6 +25,7 @@ type ResponseHeader struct {
 	ST        string `json:"server_time"`
 	ErrCode   string `json:"error_code,omitempty"`
 	StausCode int    `json:"status_code"`
+	Message   string `json:"message"`
 }
 
 type Response struct {

@@ -1,9 +1,7 @@
-package error
+package apperror
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
 )
 
 type Error struct {
@@ -74,36 +72,20 @@ func (err *Error) Code() string {
 }
 
 func (err *Error) HttpCode() int {
+	if err.httpCode < 200 {
+		err.httpCode = 200
+	}
 	return err.httpCode
 }
 
-func (r repo) ErrorHandler(err error) ([]byte, int) {
-	var (
-		errResp      interface{}
-		responseBody []byte
-	)
+func (r repo) ErrorHandler(err error) (string, string, int) {
 	appErr, ok := err.(*Error)
 
 	if !ok {
 		appErr = InternalServerError(err.Error(), "Something went wrong, please try after sometime")
 	}
 
-	errInUnMarshal := json.Unmarshal([]byte(appErr.Error()), &errResp)
-	if errInUnMarshal != nil {
-		log.Printf("Unable to unmarshal err string %+v", err)
-		responseBody, _ = json.Marshal(map[string]interface{}{
-			"code":    appErr.Code(),
-			"message": appErr.Error(),
-		})
-
-	} else {
-		responseBody, _ = json.Marshal(map[string]interface{}{
-			"code":    appErr.Code(),
-			"message": errResp,
-			"err":     errResp,
-		})
-	}
-	return responseBody, appErr.HttpCode()
+	return appErr.Code(), appErr.Error(), appErr.HttpCode()
 }
 func Init() AppError {
 	return repo{}
