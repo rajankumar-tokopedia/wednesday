@@ -11,8 +11,8 @@ import (
 	"github.com/tokopedia/wednesday/src/constants"
 	"github.com/tokopedia/wednesday/src/handler"
 	"github.com/tokopedia/wednesday/src/middleware"
-	"github.com/tokopedia/wednesday/src/model"
 	"github.com/tokopedia/wednesday/src/server"
+	"github.com/tokopedia/wednesday/src/usecase"
 )
 
 func main() {
@@ -21,7 +21,7 @@ func main() {
 	appServer := server.NewHttpServer(appError)
 
 	appServer.AddMiddleware(middleware.SetupContext)
-	models := model.Init()
+	models := usecase.Init()
 	//models := model.InitMockModule()
 	h := handler.Init(models)
 	//Healthcheck handler
@@ -31,13 +31,9 @@ func main() {
 		}, nil
 	})
 
-	//	curl --location --request POST 'localhost:5176/api/v1/bookings' \
-	//	--header 'Content-Type: application/json' \
-	//	--data-raw '{
-	//	"user_id":1,
-	//		"limit":3
-	//}'
-	appServer.POST("/api/v1/bookings", h.GetBookings)
+	appServer.POST("/api/v1/user/bookings", h.GetBookings)
+	appServer.POST("/api/v1/cabs/near", h.GetNearByCabs)
+	appServer.POST("/api/v1/cab/book", h.BookCab)
 
 	log.Fatal(grace.Serve(constants.Port, appServer))
 }
