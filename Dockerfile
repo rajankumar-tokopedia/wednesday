@@ -23,6 +23,7 @@ RUN go build -o server .
 # Move to /dist directory as the place for resulting binary folder
 WORKDIR /dist
 
+
 # Copy binary from build to main folder
 RUN cp /build/server .
 
