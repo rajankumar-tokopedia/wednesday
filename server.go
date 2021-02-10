@@ -8,7 +8,6 @@ import (
 	"gopkg.in/paytm/grace.v1"
 
 	"github.com/tokopedia/wednesday/src/apperror"
-	"github.com/tokopedia/wednesday/src/constants"
 	"github.com/tokopedia/wednesday/src/handler"
 	"github.com/tokopedia/wednesday/src/middleware"
 	"github.com/tokopedia/wednesday/src/server"
@@ -35,5 +34,5 @@ func main() {
 	appServer.POST("/api/v1/cabs/near", h.GetNearByCabs)
 	appServer.POST("/api/v1/cab/book", h.BookCab)
 
-	log.Fatal(grace.Serve(constants.Port, appServer))
+	log.Fatal(grace.Serve(":3000", appServer))
 }
